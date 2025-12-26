@@ -5,6 +5,9 @@ import { generateBASTNumber } from "@/lib/bast/generator";
 import { db, initializeDatabase, migrateDatabase } from "@/lib/db/client";
 import { BASTGenerateRequest } from "@/types";
 
+// Force dynamic rendering to prevent build-time database access
+export const dynamic = 'force-dynamic';
+
 // Initialize database on first use (idempotent)
 let dbInitialized = false;
 async function ensureDatabaseInitialized() {

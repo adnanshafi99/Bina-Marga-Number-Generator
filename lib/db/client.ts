@@ -1,19 +1,31 @@
 import { createClient, Client } from "@libsql/client";
 
 let dbInstance: Client | null = null;
-let isBuilding = false;
 
 // Check if we're in build mode
-if (typeof process !== "undefined") {
-  isBuilding = process.env.NEXT_PHASE === "phase-production-build" || 
-                process.argv.includes("build") ||
-                process.env.npm_lifecycle_event === "build";
+function isBuildTime(): boolean {
+  if (typeof process === "undefined") return false;
+  return (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.argv.includes("build") ||
+    process.env.npm_lifecycle_event === "build" ||
+    process.env.VERCEL === "1" // Vercel build environment
+  );
 }
 
 function getDb(): Client {
-  // During build, throw a more helpful error or return a mock
-  if (isBuilding) {
-    throw new Error("Database client should not be accessed during build time");
+  // During build, don't initialize - return a mock that will fail gracefully
+  if (isBuildTime()) {
+    // Return a mock client that throws helpful errors if actually used
+    return {
+      execute: () => {
+        throw new Error("Database client cannot be accessed during build time. This should only be called at runtime.");
+      },
+      transaction: () => {
+        throw new Error("Database client cannot be accessed during build time. This should only be called at runtime.");
+      },
+      close: () => {},
+    } as unknown as Client;
   }
 
   if (!dbInstance) {
@@ -38,10 +50,18 @@ function getDb(): Client {
   return dbInstance;
 }
 
-// Export db directly - the client will be initialized on first use
-// We avoid Proxy and wrappers as they break @libsql/client's private methods
-// The getDb() function handles lazy initialization internally
-export const db = getDb();
+// Lazy database client export - only initialized when actually accessed at runtime
+// This prevents build-time database access which causes build failures
+export const db = new Proxy({} as Client, {
+  get(_target, prop) {
+    const instance = getDb();
+    const value = instance[prop as keyof Client];
+    if (typeof value === 'function') {
+      return value.bind(instance);
+    }
+    return value;
+  }
+});
 
 // Initialize database schema
 export async function initializeDatabase() {

@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { generateBASTNumber } from "@/lib/bast/generator";
 import { db, migrateDatabase } from "@/lib/db/client";
 
+// Force dynamic rendering to prevent build-time database access
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request: NextRequest) {
   try {
     // Run migration to add missing columns (idempotent)

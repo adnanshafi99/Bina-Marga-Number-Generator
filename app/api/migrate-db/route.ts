@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 
+// Force dynamic rendering to prevent build-time database access
+export const dynamic = 'force-dynamic';
+
 // Migration endpoint to add budget and company_name columns
 export async function POST(request: NextRequest) {
   try {

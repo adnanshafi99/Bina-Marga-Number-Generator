@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import { BASTRecord } from "@/types";
 
+// Force dynamic rendering to prevent build-time database access
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
