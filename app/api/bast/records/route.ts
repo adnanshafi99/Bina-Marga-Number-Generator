@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db/client";
+import { db, initializeDatabase } from "@/lib/db/client";
 import { BASTRecord } from "@/types";
 
 // Force dynamic rendering to prevent build-time database access
@@ -13,6 +13,14 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Initialize database if tables don't exist yet
+    try {
+      await initializeDatabase();
+    } catch (initError) {
+      // If initialization fails, it might already be initialized - continue
+      console.warn("Database initialization check:", initError);
     }
 
     const { searchParams } = new URL(request.url);
@@ -70,8 +78,19 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching BAST records:", error);
+    
+    // If table doesn't exist, return empty array (database not initialized yet)
+    if (error.message?.includes("no such table") || error.message?.includes("does not exist")) {
+      return NextResponse.json({
+        records: [],
+        total: 0,
+        limit,
+        offset,
+      });
+    }
+    
     return NextResponse.json(
       { error: "Failed to fetch BAST records" },
       { status: 500 }
