@@ -83,6 +83,10 @@ export async function GET(request: NextRequest) {
     
     // If table doesn't exist, return empty array (database not initialized yet)
     if (error.message?.includes("no such table") || error.message?.includes("does not exist")) {
+      const { searchParams } = new URL(request.url);
+      const limit = parseInt(searchParams.get("limit") || "100");
+      const offset = parseInt(searchParams.get("offset") || "0");
+
       return NextResponse.json({
         records: [],
         total: 0,
