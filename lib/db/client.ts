@@ -5,11 +5,11 @@ let dbInstance: Client | null = null;
 // Check if we're in build mode
 function isBuildTime(): boolean {
   if (typeof process === "undefined") return false;
+  // Only check for actual build-time indicators, not runtime environment variables
   return (
     process.env.NEXT_PHASE === "phase-production-build" ||
     process.argv.includes("build") ||
-    process.env.npm_lifecycle_event === "build" ||
-    process.env.VERCEL === "1" // Vercel build environment
+    process.env.npm_lifecycle_event === "build"
   );
 }
 
