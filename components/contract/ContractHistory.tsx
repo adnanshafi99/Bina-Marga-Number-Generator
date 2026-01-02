@@ -36,8 +36,12 @@ import {
 } from "@/components/ui/dialog";
 import { ContractRecord } from "@/types";
 import { Pencil } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/context";
+import { formatDateString, formatDateTimeString } from "@/lib/utils";
+import { DateInput } from "@/components/ui/date-input";
 
 export function ContractHistory() {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<ContractRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,12 +83,12 @@ export function ContractHistory() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch records");
+        throw new Error(data.error || t("errors.failedToFetch"));
       }
 
       setRecords(data.records || []);
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || t("errors.failedToFetch"));
     } finally {
       setLoading(false);
     }
@@ -145,13 +149,13 @@ export function ContractHistory() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to update record");
+        throw new Error(data.error || t("errors.failedToUpdateContract"));
       }
 
       setEditingRecord(null);
       fetchRecords();
     } catch (err: any) {
-      setEditError(err.message || "An error occurred");
+      setEditError(err.message || t("errors.failedToUpdateContract"));
     } finally {
       setEditLoading(false);
     }
@@ -160,84 +164,84 @@ export function ContractHistory() {
   return (
     <Card className="border-2 shadow-xl">
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl">Contract Records History</CardTitle>
-        <CardDescription className="text-base">View all generated contract numbers</CardDescription>
+        <CardTitle className="text-2xl">{t("contract.historyTitle")}</CardTitle>
+        <CardDescription className="text-base">{t("contract.historyDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <Label htmlFor="year_filter">Filter by Year</Label>
+            <Label htmlFor="year_filter">{t("contract.filterByYear")}</Label>
             <Input
               id="year_filter"
               type="text"
-              placeholder="e.g., 2025"
+              placeholder={t("contract.yearPlaceholder")}
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
             />
           </div>
 
           <div>
-            <Label htmlFor="location_filter">Location</Label>
+            <Label htmlFor="location_filter">{t("contract.location")}</Label>
             <Select
               value={locationFilter || "all"}
               onValueChange={(value) => setLocationFilter(value === "all" ? "" : value)}
             >
               <SelectTrigger id="location_filter">
-                <SelectValue placeholder="All locations" />
+                <SelectValue placeholder={t("contract.allLocations")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="621">Karimun Island</SelectItem>
-                <SelectItem value="622">Outside Karimun Island</SelectItem>
+                <SelectItem value="all">{t("contract.allLocations")}</SelectItem>
+                <SelectItem value="621">{t("contract.karimunIsland").replace(" (621)", "")}</SelectItem>
+                <SelectItem value="622">{t("contract.outsideKarimun").replace(" (622)", "")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="work_type_filter">Work Type</Label>
+            <Label htmlFor="work_type_filter">{t("contract.workType")}</Label>
             <Select
               value={workTypeFilter || "all"}
               onValueChange={(value) => setWorkTypeFilter(value === "all" ? "" : value)}
             >
               <SelectTrigger id="work_type_filter">
-                <SelectValue placeholder="All work types" />
+                <SelectValue placeholder={t("contract.allWorkTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Work Types</SelectItem>
-                <SelectItem value="BM">Physical Work (BM)</SelectItem>
-                <SelectItem value="BM-KONS">Consultancy (BM-KONS)</SelectItem>
+                <SelectItem value="all">{t("contract.allWorkTypes")}</SelectItem>
+                <SelectItem value="BM">{t("contract.physicalWork")}</SelectItem>
+                <SelectItem value="BM-KONS">{t("contract.consultancy")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="procurement_type_filter">Procurement Type</Label>
+            <Label htmlFor="procurement_type_filter">{t("contract.procurementType")}</Label>
             <Select
               value={procurementTypeFilter || "all"}
               onValueChange={(value) => setProcurementTypeFilter(value === "all" ? "" : value)}
             >
               <SelectTrigger id="procurement_type_filter">
-                <SelectValue placeholder="All types" />
+                <SelectValue placeholder={t("contract.allTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="SP">Tender (SP)</SelectItem>
-                <SelectItem value="SPK">Direct Procurement (SPK)</SelectItem>
+                <SelectItem value="all">{t("contract.allTypes")}</SelectItem>
+                <SelectItem value="SP">{t("contract.tender")}</SelectItem>
+                <SelectItem value="SPK">{t("contract.directProcurement")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
         <div className="mb-4 flex gap-2">
-          <Button onClick={handleFilter}>Apply Filters</Button>
+          <Button onClick={handleFilter}>{t("common.applyFilters")}</Button>
           {(yearFilter || locationFilter || workTypeFilter || procurementTypeFilter) && (
             <Button variant="outline" onClick={handleClearFilter}>
-              Clear Filters
+              {t("common.clearFilters")}
             </Button>
           )}
         </div>
 
-        {loading && <p className="text-center py-4">Loading...</p>}
+        {loading && <p className="text-center py-4">{t("common.loading")}</p>}
 
         {error && (
           <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
@@ -247,7 +251,7 @@ export function ContractHistory() {
 
         {!loading && !error && records.length === 0 && (
           <p className="text-center py-4 text-muted-foreground">
-            No contract records found.
+            {t("contract.noRecords")}
           </p>
         )}
 
@@ -256,16 +260,16 @@ export function ContractHistory() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Contract Number</TableHead>
-                  <TableHead>Project Name</TableHead>
-                  <TableHead>Contract Date</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Work Type</TableHead>
-                  <TableHead>Procurement</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Company Name</TableHead>
-                  <TableHead>Registration Date</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t("contract.tableHeaders.contractNumber")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.projectName")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.contractDate")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.location")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.workType")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.procurement")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.budget")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.companyName")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.registrationDate")}</TableHead>
+                  <TableHead>{t("contract.tableHeaders.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -276,19 +280,19 @@ export function ContractHistory() {
                     </TableCell>
                     <TableCell>{record.project_name}</TableCell>
                     <TableCell>
-                      {record.contract_date ? new Date(record.contract_date + 'T00:00:00').toLocaleDateString() : ''}
+                      {record.contract_date ? formatDateString(record.contract_date) : ''}
                     </TableCell>
                     <TableCell>
                       {record.location_code === "621"
-                        ? "Karimun Island"
-                        : "Outside Karimun Island"}
+                        ? t("contract.karimunIsland").replace(" (621)", "")
+                        : t("contract.outsideKarimun").replace(" (622)", "")}
                     </TableCell>
                     <TableCell>{record.work_type}</TableCell>
                     <TableCell>{record.procurement_type}</TableCell>
                     <TableCell>{record.budget || '-'}</TableCell>
                     <TableCell>{record.company_name || '-'}</TableCell>
                     <TableCell>
-                      {new Date(record.registration_datetime).toLocaleString()}
+                      {formatDateTimeString(record.registration_datetime)}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -309,14 +313,14 @@ export function ContractHistory() {
         <Dialog open={editingRecord !== null} onOpenChange={(open) => !open && setEditingRecord(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Edit Contract Record</DialogTitle>
+              <DialogTitle>{t("contract.editDialog.title")}</DialogTitle>
               <DialogDescription>
-                Update the contract details. The contract number will be regenerated based on the new inputs.
+                {t("contract.editDialog.description")}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit_project_name">Project Name</Label>
+                <Label htmlFor="edit_project_name">{t("contract.projectName")}</Label>
                 <Input
                   id="edit_project_name"
                   value={editProjectName}
@@ -325,18 +329,19 @@ export function ContractHistory() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_contract_date">Contract Date</Label>
-                <Input
+                <Label htmlFor="edit_contract_date">{t("contract.contractDate")}</Label>
+                <DateInput
                   id="edit_contract_date"
-                  type="date"
                   value={editContractDate}
-                  onChange={(e) => setEditContractDate(e.target.value)}
+                  onChange={(value) => setEditContractDate(value)}
                   required
+                  placeholder={t("contract.datePlaceholder")}
                 />
+                <p className="text-xs text-muted-foreground">{t("contract.dateFormatHint")}</p>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit_location">Location</Label>
+                  <Label htmlFor="edit_location">{t("contract.location")}</Label>
                   <Select
                     value={editLocation}
                     onValueChange={(value) => setEditLocation(value as "621" | "622")}
@@ -345,13 +350,13 @@ export function ContractHistory() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="621">Karimun Island (621)</SelectItem>
-                      <SelectItem value="622">Outside Karimun Island (622)</SelectItem>
+                      <SelectItem value="621">{t("contract.karimunIsland")}</SelectItem>
+                      <SelectItem value="622">{t("contract.outsideKarimun")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit_work_type">Work Type</Label>
+                  <Label htmlFor="edit_work_type">{t("contract.workType")}</Label>
                   <Select
                     value={editWorkType}
                     onValueChange={(value) => setEditWorkType(value as "BM" | "BM-KONS")}
@@ -360,13 +365,13 @@ export function ContractHistory() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="BM">Physical Work (BM)</SelectItem>
-                      <SelectItem value="BM-KONS">Consultancy (BM-KONS)</SelectItem>
+                      <SelectItem value="BM">{t("contract.physicalWork")}</SelectItem>
+                      <SelectItem value="BM-KONS">{t("contract.consultancy")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit_procurement_type">Procurement Type</Label>
+                  <Label htmlFor="edit_procurement_type">{t("contract.procurementType")}</Label>
                   <Select
                     value={editProcurementType}
                     onValueChange={(value) => setEditProcurementType(value as "SP" | "SPK")}
@@ -375,30 +380,30 @@ export function ContractHistory() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="SP">Tender (SP)</SelectItem>
-                      <SelectItem value="SPK">Direct Procurement (SPK)</SelectItem>
+                      <SelectItem value="SP">{t("contract.tender")}</SelectItem>
+                      <SelectItem value="SPK">{t("contract.directProcurement")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_budget">Budget</Label>
+                <Label htmlFor="edit_budget">{t("contract.budget")}</Label>
                 <Input
                   id="edit_budget"
                   type="text"
                   value={editBudget}
                   onChange={(e) => setEditBudget(e.target.value)}
-                  placeholder="Enter budget amount"
+                  placeholder={t("contract.budgetPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_company_name">Company Name</Label>
+                <Label htmlFor="edit_company_name">{t("contract.companyName")}</Label>
                 <Input
                   id="edit_company_name"
                   type="text"
                   value={editCompanyName}
                   onChange={(e) => setEditCompanyName(e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder={t("contract.companyNamePlaceholder")}
                 />
               </div>
               {editError && (
@@ -409,10 +414,10 @@ export function ContractHistory() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setEditingRecord(null)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSaveEdit} disabled={editLoading}>
-                {editLoading ? "Saving..." : "Save Changes"}
+                {editLoading ? t("common.saving") : t("common.saveChanges")}
               </Button>
             </DialogFooter>
           </DialogContent>

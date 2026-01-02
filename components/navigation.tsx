@@ -5,10 +5,13 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function Navigation() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => pathname === path;
 
@@ -21,7 +24,7 @@ export function Navigation() {
               href="/"
               className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent hover:from-primary hover:to-primary/70 transition-all"
             >
-              Bina Marga
+              {t("nav.binaMarga")}
             </Link>
             {status === "authenticated" && (
               <div className="hidden md:flex items-center gap-1">
@@ -34,7 +37,7 @@ export function Navigation() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  BAST Generator
+                  {t("nav.bastGenerator")}
                 </Link>
                 <Link
                   href="/bast/history"
@@ -45,7 +48,7 @@ export function Navigation() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  BAST History
+                  {t("nav.bastHistory")}
                 </Link>
                 <Link
                   href="/contract"
@@ -56,7 +59,7 @@ export function Navigation() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  Contract Generator
+                  {t("nav.contractGenerator")}
                 </Link>
                 <Link
                   href="/contract/history"
@@ -67,24 +70,25 @@ export function Navigation() {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  Contract History
+                  {t("nav.contractHistory")}
                 </Link>
               </div>
             )}
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             {status === "authenticated" ? (
               <>
                 <span className="hidden sm:inline-block text-sm text-muted-foreground px-3 py-1.5 rounded-md bg-muted/50">
                   {session?.user?.email}
                 </span>
                 <Button variant="outline" onClick={() => signOut()} size="sm">
-                  Sign Out
+                  {t("common.signOut")}
                 </Button>
               </>
             ) : (
               <Link href="/login">
-                <Button size="sm">Sign In</Button>
+                <Button size="sm">{t("common.signIn")}</Button>
               </Link>
             )}
           </div>

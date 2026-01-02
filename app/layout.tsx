@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Bina Marga Number Generator",
   description: "BAST and Contract Number Generator for Bina Marga",
+  // Note: For dynamic translations, consider using a client component wrapper
 };
 
 export default function RootLayout({

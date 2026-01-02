@@ -19,9 +19,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ContractGenerateRequest } from "@/types";
-import { formatDateString } from "@/lib/utils";
+import { formatDateString, formatDateTimeString } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/context";
+import { DateInput } from "@/components/ui/date-input";
 
 export function ContractForm() {
+  const { t } = useTranslation();
   const [projectName, setProjectName] = useState("");
   const [contractDate, setContractDate] = useState("");
   const [location, setLocation] = useState<"621" | "622">("621");
@@ -59,7 +62,7 @@ export function ContractForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate contract number");
+        throw new Error(data.error || t("errors.failedToGenerateContract"));
       }
 
       setResult(data);
@@ -72,7 +75,7 @@ export function ContractForm() {
       setBudget("");
       setCompanyName("");
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || t("errors.failedToGenerateContract"));
     } finally {
       setLoading(false);
     }
@@ -81,70 +84,71 @@ export function ContractForm() {
   return (
     <Card className="border-2 shadow-xl">
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl">Generate Contract Number</CardTitle>
+        <CardTitle className="text-2xl">{t("contract.formTitle")}</CardTitle>
         <CardDescription className="text-base">
-          Enter contract details to generate a new contract number
+          {t("contract.formDescription")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project_name">Project / Work Name</Label>
+            <Label htmlFor="project_name">{t("contract.projectName")}</Label>
             <Input
               id="project_name"
               type="text"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               required
-              placeholder="Enter project or work name"
+              placeholder={t("contract.projectNamePlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contract_date">Contract Date</Label>
-            <Input
+            <Label htmlFor="contract_date">{t("contract.contractDate")}</Label>
+            <DateInput
               id="contract_date"
-              type="date"
               value={contractDate}
-              onChange={(e) => setContractDate(e.target.value)}
+              onChange={(value) => setContractDate(value)}
               required
+              placeholder={t("contract.datePlaceholder")}
             />
+            <p className="text-xs text-muted-foreground">{t("contract.dateFormatHint")}</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">{t("contract.location")}</Label>
             <Select
               value={location}
               onValueChange={(value) => setLocation(value as "621" | "622")}
             >
               <SelectTrigger id="location">
-                <SelectValue placeholder="Select location" />
+                <SelectValue placeholder={t("contract.selectLocation")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="621">Karimun Island (621)</SelectItem>
-                <SelectItem value="622">Outside Karimun Island (622)</SelectItem>
+                <SelectItem value="621">{t("contract.karimunIsland")}</SelectItem>
+                <SelectItem value="622">{t("contract.outsideKarimun")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="work_type">Work Type</Label>
+            <Label htmlFor="work_type">{t("contract.workType")}</Label>
             <Select
               value={workType}
               onValueChange={(value) => setWorkType(value as "BM" | "BM-KONS")}
             >
               <SelectTrigger id="work_type">
-                <SelectValue placeholder="Select work type" />
+                <SelectValue placeholder={t("contract.selectWorkType")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="BM">Physical Work (BM)</SelectItem>
-                <SelectItem value="BM-KONS">Consultancy (BM-KONS)</SelectItem>
+                <SelectItem value="BM">{t("contract.physicalWork")}</SelectItem>
+                <SelectItem value="BM-KONS">{t("contract.consultancy")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="procurement_type">Procurement Type</Label>
+            <Label htmlFor="procurement_type">{t("contract.procurementType")}</Label>
             <Select
               value={procurementType}
               onValueChange={(value) =>
@@ -152,34 +156,34 @@ export function ContractForm() {
               }
             >
               <SelectTrigger id="procurement_type">
-                <SelectValue placeholder="Select procurement type" />
+                <SelectValue placeholder={t("contract.selectProcurementType")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SP">Tender (SP)</SelectItem>
-                <SelectItem value="SPK">Direct Procurement (SPK)</SelectItem>
+                <SelectItem value="SP">{t("contract.tender")}</SelectItem>
+                <SelectItem value="SPK">{t("contract.directProcurement")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="budget">Budget</Label>
+            <Label htmlFor="budget">{t("contract.budget")}</Label>
             <Input
               id="budget"
               type="text"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
-              placeholder="Enter budget amount"
+              placeholder={t("contract.budgetPlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company_name">Company Name</Label>
+            <Label htmlFor="company_name">{t("contract.companyName")}</Label>
             <Input
               id="company_name"
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Enter company name"
+              placeholder={t("contract.companyNamePlaceholder")}
             />
           </div>
 
@@ -206,10 +210,10 @@ export function ContractForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Generating...
+                {t("contract.generating")}
               </>
             ) : (
-              "Generate Contract Number"
+              t("contract.generateButton")
             )}
           </Button>
         </form>
@@ -237,40 +241,40 @@ export function ContractForm() {
                 />
               </svg>
               <h3 className="font-semibold text-green-900 dark:text-green-100 text-lg">
-                Contract Number Generated Successfully!
+                {t("contract.successTitle")}
               </h3>
             </div>
             <div className="space-y-1 text-sm">
               <p>
-                <span className="font-medium">Contract Number:</span>{" "}
+                <span className="font-medium">{t("contract.contractNumber")}</span>{" "}
                 <span className="font-mono text-lg">
                   {result.contract_number}
                 </span>
               </p>
               <p>
-                <span className="font-medium">Project Name:</span>{" "}
+                <span className="font-medium">{t("contract.projectNameLabel")}</span>{" "}
                 {result.project_name}
               </p>
               <p>
-                <span className="font-medium">Contract Date:</span>{" "}
+                <span className="font-medium">{t("contract.contractDateLabel")}</span>{" "}
                 {formatDateString(result.contract_date)}
               </p>
               <p>
-                <span className="font-medium">Location:</span>{" "}
+                <span className="font-medium">{t("contract.locationLabel")}</span>{" "}
                 {result.location_code === "621"
-                  ? "Karimun Island"
-                  : "Outside Karimun Island"}
+                  ? t("contract.karimunIsland").replace(" (621)", "")
+                  : t("contract.outsideKarimun").replace(" (622)", "")}
               </p>
               <p>
-                <span className="font-medium">Work Type:</span> {result.work_type}
+                <span className="font-medium">{t("contract.workTypeLabel")}</span> {result.work_type}
               </p>
               <p>
-                <span className="font-medium">Procurement Type:</span>{" "}
+                <span className="font-medium">{t("contract.procurementTypeLabel")}</span>{" "}
                 {result.procurement_type}
               </p>
               <p>
-                <span className="font-medium">Registration Date:</span>{" "}
-                {new Date(result.registration_datetime).toLocaleString()}
+                <span className="font-medium">{t("contract.registrationDate")}</span>{" "}
+                {formatDateTimeString(result.registration_datetime)}
               </p>
             </div>
           </div>

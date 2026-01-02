@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BASTGenerateRequest } from "@/types";
-import { formatDateString } from "@/lib/utils";
+import { formatDateString, formatDateTimeString } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/context";
+import { DateInput } from "@/components/ui/date-input";
 
 export function BASTForm() {
+  const { t } = useTranslation();
   const [projectName, setProjectName] = useState("");
   const [bastDate, setBastDate] = useState("");
   const [budget, setBudget] = useState("");
@@ -40,7 +43,7 @@ export function BASTForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate BAST number");
+        throw new Error(data.error || t("errors.failedToGenerate"));
       }
 
       setResult(data);
@@ -50,7 +53,7 @@ export function BASTForm() {
       setBudget("");
       setCompanyName("");
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || t("errors.failedToGenerate"));
     } finally {
       setLoading(false);
     }
@@ -59,55 +62,56 @@ export function BASTForm() {
   return (
     <Card className="border-2 shadow-xl">
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl">Generate BAST Number</CardTitle>
+        <CardTitle className="text-2xl">{t("bast.formTitle")}</CardTitle>
         <CardDescription className="text-base">
-          Enter project details to generate a new BAST number
+          {t("bast.formDescription")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project_name">Project / Work Name</Label>
+            <Label htmlFor="project_name">{t("bast.projectName")}</Label>
             <Input
               id="project_name"
               type="text"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               required
-              placeholder="Enter project or work name"
+              placeholder={t("bast.projectNamePlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bast_date">BAST Date</Label>
-            <Input
+            <Label htmlFor="bast_date">{t("bast.bastDate")}</Label>
+            <DateInput
               id="bast_date"
-              type="date"
               value={bastDate}
-              onChange={(e) => setBastDate(e.target.value)}
+              onChange={(value) => setBastDate(value)}
               required
+              placeholder={t("bast.datePlaceholder")}
             />
+            <p className="text-xs text-muted-foreground">{t("bast.dateFormatHint")}</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="budget">Budget</Label>
+            <Label htmlFor="budget">{t("bast.budget")}</Label>
             <Input
               id="budget"
               type="text"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
-              placeholder="Enter budget amount"
+              placeholder={t("bast.budgetPlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company_name">Company Name</Label>
+            <Label htmlFor="company_name">{t("bast.companyName")}</Label>
             <Input
               id="company_name"
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Enter company name"
+              placeholder={t("bast.companyNamePlaceholder")}
             />
           </div>
 
@@ -134,10 +138,10 @@ export function BASTForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Generating...
+                {t("bast.generating")}
               </>
             ) : (
-              "Generate BAST Number"
+              t("bast.generateButton")
             )}
           </Button>
         </form>
@@ -165,25 +169,25 @@ export function BASTForm() {
                 />
               </svg>
               <h3 className="font-semibold text-green-900 dark:text-green-100 text-lg">
-                BAST Number Generated Successfully!
+                {t("bast.successTitle")}
               </h3>
             </div>
             <div className="space-y-1 text-sm">
               <p>
-                <span className="font-medium">BAST Number:</span>{" "}
+                <span className="font-medium">{t("bast.bastNumber")}</span>{" "}
                 <span className="font-mono text-lg">{result.bast_number}</span>
               </p>
               <p>
-                <span className="font-medium">Project Name:</span>{" "}
+                <span className="font-medium">{t("bast.projectNameLabel")}</span>{" "}
                 {result.project_name}
               </p>
               <p>
-                <span className="font-medium">BAST Date:</span>{" "}
+                <span className="font-medium">{t("bast.bastDateLabel")}</span>{" "}
                 {formatDateString(result.bast_date)}
               </p>
               <p>
-                <span className="font-medium">Registration Date:</span>{" "}
-                {new Date(result.registration_datetime).toLocaleString()}
+                <span className="font-medium">{t("bast.registrationDate")}</span>{" "}
+                {formatDateTimeString(result.registration_datetime)}
               </p>
             </div>
           </div>

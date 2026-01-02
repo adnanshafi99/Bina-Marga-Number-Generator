@@ -23,8 +23,12 @@ import {
 } from "@/components/ui/dialog";
 import { BASTRecord } from "@/types";
 import { Pencil } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/context";
+import { formatDateString, formatDateTimeString } from "@/lib/utils";
+import { DateInput } from "@/components/ui/date-input";
 
 export function BASTHistory() {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<BASTRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,12 +55,12 @@ export function BASTHistory() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch records");
+        throw new Error(data.error || t("errors.failedToFetch"));
       }
 
       setRecords(data.records || []);
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || t("errors.failedToFetch"));
     } finally {
       setLoading(false);
     }
@@ -108,13 +112,13 @@ export function BASTHistory() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to update record");
+        throw new Error(data.error || t("errors.failedToUpdate"));
       }
 
       setEditingRecord(null);
       fetchRecords();
     } catch (err: any) {
-      setEditError(err.message || "An error occurred");
+      setEditError(err.message || t("errors.failedToUpdate"));
     } finally {
       setEditLoading(false);
     }
@@ -123,30 +127,30 @@ export function BASTHistory() {
   return (
     <Card className="border-2 shadow-xl">
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl">BAST Records History</CardTitle>
-        <CardDescription className="text-base">View all generated BAST numbers</CardDescription>
+        <CardTitle className="text-2xl">{t("bast.historyTitle")}</CardTitle>
+        <CardDescription className="text-base">{t("bast.historyDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex gap-2 items-end">
           <div className="flex-1">
-            <Label htmlFor="year_filter">Filter by Year</Label>
+            <Label htmlFor="year_filter">{t("bast.filterByYear")}</Label>
             <Input
               id="year_filter"
               type="text"
-              placeholder="e.g., 2025"
+              placeholder={t("bast.yearPlaceholder")}
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
             />
           </div>
-          <Button onClick={handleFilter}>Filter</Button>
+          <Button onClick={handleFilter}>{t("common.filter")}</Button>
           {yearFilter && (
             <Button variant="outline" onClick={handleClearFilter}>
-              Clear
+              {t("common.clear")}
             </Button>
           )}
         </div>
 
-        {loading && <p className="text-center py-4">Loading...</p>}
+        {loading && <p className="text-center py-4">{t("common.loading")}</p>}
 
         {error && (
           <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
@@ -156,7 +160,7 @@ export function BASTHistory() {
 
         {!loading && !error && records.length === 0 && (
           <p className="text-center py-4 text-muted-foreground">
-            No BAST records found.
+            {t("bast.noRecords")}
           </p>
         )}
 
@@ -165,13 +169,13 @@ export function BASTHistory() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>BAST Number</TableHead>
-                  <TableHead>Project Name</TableHead>
-                  <TableHead>BAST Date</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Company Name</TableHead>
-                  <TableHead>Registration Date</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t("bast.tableHeaders.bastNumber")}</TableHead>
+                  <TableHead>{t("bast.tableHeaders.projectName")}</TableHead>
+                  <TableHead>{t("bast.tableHeaders.bastDate")}</TableHead>
+                  <TableHead>{t("bast.tableHeaders.budget")}</TableHead>
+                  <TableHead>{t("bast.tableHeaders.companyName")}</TableHead>
+                  <TableHead>{t("bast.tableHeaders.registrationDate")}</TableHead>
+                  <TableHead>{t("bast.tableHeaders.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -182,12 +186,12 @@ export function BASTHistory() {
                     </TableCell>
                     <TableCell>{record.project_name}</TableCell>
                     <TableCell>
-                      {record.bast_date ? new Date(record.bast_date + 'T00:00:00').toLocaleDateString() : ''}
+                      {record.bast_date ? formatDateString(record.bast_date) : ''}
                     </TableCell>
                     <TableCell>{record.budget || '-'}</TableCell>
                     <TableCell>{record.company_name || '-'}</TableCell>
                     <TableCell>
-                      {new Date(record.registration_datetime).toLocaleString()}
+                      {formatDateTimeString(record.registration_datetime)}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -208,14 +212,14 @@ export function BASTHistory() {
         <Dialog open={editingRecord !== null} onOpenChange={(open) => !open && setEditingRecord(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit BAST Record</DialogTitle>
+              <DialogTitle>{t("bast.editDialog.title")}</DialogTitle>
               <DialogDescription>
-                Update the project name and date. The BAST number will be regenerated based on the new date.
+                {t("bast.editDialog.description")}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit_project_name">Project Name</Label>
+                <Label htmlFor="edit_project_name">{t("bast.projectName")}</Label>
                 <Input
                   id="edit_project_name"
                   value={editProjectName}
@@ -224,33 +228,34 @@ export function BASTHistory() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_bast_date">BAST Date</Label>
-                <Input
+                <Label htmlFor="edit_bast_date">{t("bast.bastDate")}</Label>
+                <DateInput
                   id="edit_bast_date"
-                  type="date"
                   value={editBastDate}
-                  onChange={(e) => setEditBastDate(e.target.value)}
+                  onChange={(value) => setEditBastDate(value)}
                   required
+                  placeholder={t("bast.datePlaceholder")}
                 />
+                <p className="text-xs text-muted-foreground">{t("bast.dateFormatHint")}</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_budget">Budget</Label>
+                <Label htmlFor="edit_budget">{t("bast.budget")}</Label>
                 <Input
                   id="edit_budget"
                   type="text"
                   value={editBudget}
                   onChange={(e) => setEditBudget(e.target.value)}
-                  placeholder="Enter budget amount"
+                  placeholder={t("bast.budgetPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_company_name">Company Name</Label>
+                <Label htmlFor="edit_company_name">{t("bast.companyName")}</Label>
                 <Input
                   id="edit_company_name"
                   type="text"
                   value={editCompanyName}
                   onChange={(e) => setEditCompanyName(e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder={t("bast.companyNamePlaceholder")}
                 />
               </div>
               {editError && (
@@ -261,10 +266,10 @@ export function BASTHistory() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setEditingRecord(null)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSaveEdit} disabled={editLoading}>
-                {editLoading ? "Saving..." : "Save Changes"}
+                {editLoading ? t("common.saving") : t("common.saveChanges")}
               </Button>
             </DialogFooter>
           </DialogContent>

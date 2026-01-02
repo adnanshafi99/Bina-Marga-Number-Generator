@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "@/lib/i18n/context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,17 +30,17 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setError(t("login.invalidCredentials"));
       } else if (result?.ok) {
         // Wait a bit for session to be set, then redirect
         setTimeout(() => {
           window.location.href = "/";
         }, 100);
       } else {
-        setError("Login failed. Please try again.");
+        setError(t("login.loginFailed"));
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError(t("common.anErrorOccurred") + " " + t("common.pleaseTryAgain"));
     } finally {
       setLoading(false);
     }
@@ -65,9 +67,9 @@ export default function LoginPage() {
               </svg>
             </div>
             <div>
-              <CardTitle className="text-3xl">Sign In</CardTitle>
+              <CardTitle className="text-3xl">{t("login.title")}</CardTitle>
               <CardDescription className="text-base mt-2">
-                Enter your credentials to access the Bina Marga Number Generator
+                {t("login.description")}
               </CardDescription>
             </div>
           </CardHeader>
@@ -75,7 +77,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base font-medium">
-                  Email Address
+                  {t("login.email")}
                 </Label>
                 <Input
                   id="email"
@@ -83,14 +85,14 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@dispupr.local"
+                  placeholder={t("login.emailPlaceholder")}
                   className="h-11"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-base font-medium">
-                  Password
+                  {t("login.password")}
                 </Label>
                 <Input
                   id="password"
@@ -98,7 +100,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter your password"
+                  placeholder={t("login.passwordPlaceholder")}
                   className="h-11"
                 />
               </div>
@@ -152,10 +154,10 @@ export default function LoginPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Signing in...
+                    {t("common.signingIn")}
                   </>
                 ) : (
-                  "Sign In"
+                  t("login.signIn")
                 )}
               </Button>
             </form>
